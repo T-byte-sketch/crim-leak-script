@@ -1,0 +1,600 @@
+pcall(function()
+    local CustomDarkTheme = {
+        SchemeColor = Color3.fromRGB(45, 45, 45),
+        Background = Color3.fromRGB(30, 30, 30),
+        Header = Color3.fromRGB(20, 20, 20),
+        TextColor = Color3.fromRGB(255, 255, 255),
+        ElementColor = Color3.fromRGB(20, 20, 20)
+    }
+    
+    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+    local Xylic = loadstring(game:HttpGet("https://raw.githubusercontent.com/JackeyBot/Xylic-Notification/main/Library.lua", true))()
+    local KiriotsESPLib = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
+    local Window = Library.CreateLib("Aurora - Criminality", CustomDarkTheme)
+    
+    local CrimMainTab = Window:NewTab("Main Shit")
+    local CrimESPTab = Window:NewTab("Esp")
+    local CrimMainS = CrimMainTab:NewSection("Main")
+    local CrimPlayerS = CrimESPTab:NewSection("Player ESP")
+    local CrimScrapS = CrimESPTab:NewSection("Scrap ESP")
+    local CrimSafeS = CrimESPTab:NewSection("Safe ESP")
+    local CrimRegisterS = CrimESPTab:NewSection("Register ESP")
+    
+    local CreditsTab = Window:NewTab("Credits")
+    local CreditsOwnerS = CreditsTab:NewSection("Founders")
+    local CreditsDevsS = CreditsTab:NewSection("Developers")
+    local CreditsMiscS = CreditsTab:NewSection("Misc")
+    
+    local InfiniteStamina = false
+    local NoFailLockpick = false
+    
+    -- #region No Fail Pick
+    game.Players.LocalPlayer.PlayerGui.ChildAdded:Connect(function(Item)
+        if NoFailLockpick == true then
+            if Item.Name == "LockpickGUI" then
+                Item.MF["LP_Frame"].Frames.B1.Bar.PosV.Value = 1
+                Item.MF["LP_Frame"].Frames.B2.Bar.PosV.Value = 1
+                Item.MF["LP_Frame"].Frames.B3.Bar.PosV.Value = 1
+            end
+        elseif NoFailLockpick == false then
+            if Item.Name == "LockpickGUI" then
+                Item.MF["LP_Frame"].Frames.B1.Bar.PosV.Value = 125
+                Item.MF["LP_Frame"].Frames.B2.Bar.PosV.Value = 125
+                Item.MF["LP_Frame"].Frames.B3.Bar.PosV.Value = 125
+            end
+        end
+    end)
+    -- #endregion
+
+    -- #region AutoJoin Discord
+    if syn then
+        syn.request({
+            Url = "http://127.0.0.1:6463/rpc?v=1", Method = "POST", Headers = {["Content-Type"] = "application/json", ["Origin"] = "https://discord.com"},
+            Body = game:GetService("HttpService"):JSONEncode({cmd = "INVITE_BROWSER", args = {code = "xRYHSY35wx"}, nonce = game:GetService("HttpService"):GenerateGUID(false)}),
+        })
+    end
+    -- #endregion
+    
+    -- #region Infinite Stamina
+    local StaminaTake = getrenv()._G.S_Take
+    local StaminaFunc = getupvalue(StaminaTake, 2) 
+    for i,v in pairs(getupvalues(StaminaFunc)) do
+        if type(v) == "function" and getinfo(v).name == "Upt_S" then
+            local oldFunc; 
+            oldFunc = hookfunction(v, function(...)
+                if InfiniteStamina == true then
+                    getupvalue(StaminaFunc, 6).S = 99
+                end
+                return oldFunc(...)
+            end)
+        end
+    end
+    -- #endregion
+    
+    -- #region Admin Alert
+    game.Players.PlayerAdded:Connect(function(AdminUserCheck)
+        if AdminUserCheck.UserId == 68246168 or AdminUserCheck.UserId == 955294 or AdminUserCheck.UserId == 1095419 or AdminUserCheck.UserId == 50585425 or AdminUserCheck.UserId == 48405917 or AdminUserCheck.UserId == 9212846 or AdminUserCheck.UserId == 47352513 or AdminUserCheck.UserId == 48058122 then
+            Xylic.Notification("<b>Aurora Hub</b>", "Mod Alert\n"..AdminUserCheck.Name..", Joined.", 5)
+        elseif AdminUserCheck.UserId == 42066711 or AdminUserCheck.UserId == 513615792 then
+            Xylic.Notification("<b>Aurora Hub</b>", "Contractors Alert\n"..AdminUserCheck.Name..", Joined.", 5)
+        elseif AdminUserCheck.UserId == 151691292 or AdminUserCheck.UserId == 92504899 or AdminUserCheck.UserId == 31967243 then
+            Xylic.Notification("<b>Aurora Hub</b>", "Devs Alert\n"..AdminUserCheck.Name..", Joined.", 5)
+        elseif AdminUserCheck.UserId == 29761878 then
+            Xylic.Notification("<b>Aurora Hub</b>", "Owner Alert\nRvvz, Joined.", 5)
+        end
+    end)
+
+    for i, v in pairs(game.Players:GetPlayers()) do
+        if v.UserId == 68246168 or v.UserId == 955294 or v.UserId == 1095419 or v.UserId == 50585425 or v.UserId == 48405917 or v.UserId == 9212846 or v.UserId == 47352513 or v.UserId == 48058122 then
+            Xylic.Notification("<b>Aurora Hub</b>", "Mod Alert\n"..v.Name..", Is in the server.", 5)
+        elseif v.UserId == 42066711 or v.UserId == 513615792 then
+            Xylic.Notification("<b>Aurora Hub</b>", "Contractors Alert\n"..v.Name..", Is in the server.", 5)
+        elseif v.UserId == 151691292 or v.UserId == 92504899 or v.UserId == 31967243 then
+            Xylic.Notification("<b>Aurora Hub</b>", "Devs Alert\n"..v.Name..", Is in the server.", 5)
+        elseif v.UserId == 29761878 then
+            Xylic.Notification("<b>Aurora Hub</b>", "Owner Alert\nRvvz, Is in the server.", 5)
+        end
+    end
+    -- #endregion
+    
+    -- #region ESP Stuff
+    local ScrapEsp = false
+    local BadScrap = false
+    local GoodScrap = false
+    local RareScrap = false
+    local ScrapDistance = 250
+    
+    local SafeEsp = false
+    local GoodSafe = false
+    local RareSafe = false
+    local SafeDistance = 250
+    
+    local RegisterEsp = false
+    local RegisterDistance = 250
+    
+    local Cam = workspace.CurrentCamera
+    
+    -- #region ScrapESP 
+    local function ScrapESP(Scrap)
+        local ItemName = Drawing.new("Text")
+        ItemName.Visible = false
+        ItemName.Center = true
+        ItemName.Outline = true
+        ItemName.Font = 2
+        ItemName.Size = 13
+        ItemName.Color = Color3.new(1, 1, 1)
+        ItemName.Text = "Scrap"
+    
+        local RarityText = Drawing.new("Text")
+        RarityText.Visible = false
+        RarityText.Center = true
+        RarityText.Outline = true
+        RarityText.Font = 2
+        RarityText.Size = 13
+        RarityText.Color = Color3.new(1, 1, 1)
+        RarityText.Text = "Type"
+    
+        local DistanceText = Drawing.new("Text")
+        DistanceText.Visible = false
+        DistanceText.Center = true
+        DistanceText.Outline = true
+        DistanceText.Font = 2
+        DistanceText.Size = 13
+        DistanceText.Color = Color3.new(1, 1, 1)
+        DistanceText.Text = "Distance"
+    
+        local function InfoUpdate()
+            local Iu
+    
+            Iu = game:GetService("RunService").RenderStepped:Connect(function()
+                if not workspace:IsAncestorOf(Scrap) then
+                    ItemName.Visible = false
+                    RarityText.Visible = false
+                    DistanceText.Visible = false
+    
+                    Iu:Disconnect()
+                else
+                    local Vector, OnScreen = Cam:WorldToViewportPoint(Scrap:FindFirstChild("MeshPart").Position)
+    
+                    if OnScreen then
+                        ItemName.Position = Vector2.new(Vector.X, Vector.Y - 30)
+                        RarityText.Position = Vector2.new(Vector.X, Vector.Y - 20)
+                        DistanceText.Position = Vector2.new(Vector.X, Vector.Y - 10)
+    
+                        ItemName.Visible = false
+                        RarityText.Visible = false
+                        DistanceText.Visible = false
+    
+                        local ItemDistance = math.ceil((Scrap.MeshPart.Position - game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").Position).magnitude)
+    
+                        if ScrapEsp == true then
+                            if ItemDistance < ScrapDistance then
+                                if tostring(Scrap.MeshPart.Particle.Color) == "0 1 1 1 0 1 1 1 1 0 " then
+                                    RarityText.Text = "Rarity: Bad"
+                                    RarityText.Color = Color3.new(1, 1, 1)
+        
+                                    if BadScrap == true then
+                                        ItemName.Visible = true
+                                        RarityText.Visible = true
+                                        DistanceText.Visible = true
+                                    else
+                                        ItemName.Visible = false
+                                        RarityText.Visible = false
+                                        DistanceText.Visible = false
+                                    end
+                                elseif tostring(Scrap.MeshPart.Particle.Color) == "0 0.184314 1 0.4 0 1 0.184314 1 0.4 0 " then
+                                    RarityText.Text = "Rarity: Good"
+                                    RarityText.Color = Color3.new(0, 1, 0)
+        
+                                    if GoodScrap == true then
+                                        ItemName.Visible = true
+                                        RarityText.Visible = true
+                                        DistanceText.Visible = true
+                                    else
+                                        ItemName.Visible = false
+                                        RarityText.Visible = false
+                                        DistanceText.Visible = false
+                                    end
+                                elseif tostring(Scrap.MeshPart.Particle.Color) == "0 1 0.184314 0.184314 0 1 1 0.184314 0.184314 0 " then
+                                    RarityText.Text = "Rarity: Rare"
+                                    RarityText.Color = Color3.new(1, 0, 0)
+        
+                                    if RareScrap == true then
+                                        ItemName.Visible = true
+                                        RarityText.Visible = true
+                                        DistanceText.Visible = true
+                                    else
+                                        ItemName.Visible = false
+                                        RarityText.Visible = false
+                                        DistanceText.Visible = false
+                                    end
+                                end
+            
+                                DistanceText.Text = "["..tostring(ItemDistance).."]"
+                            else
+                                ItemName.Visible = false
+                                RarityText.Visible = false
+                                DistanceText.Visible = false
+                            end
+                        else
+                            ItemName.Visible = false
+                            RarityText.Visible = false
+                            DistanceText.Visible = false
+                        end
+                    else
+                        ItemName.Visible = false
+                        RarityText.Visible = false
+                        DistanceText.Visible = false
+                    end
+                end
+            end)
+        end
+        coroutine.wrap(InfoUpdate)()
+    end
+    -- #endregion
+    
+    -- #region SafeESP 
+    local function SafeESP(Vault)
+        local ItemName = Drawing.new("Text")
+        ItemName.Visible = false
+        ItemName.Center = true
+        ItemName.Outline = true
+        ItemName.Font = 2
+        ItemName.Size = 13
+        ItemName.Color = Color3.new(1, 1, 1)
+        ItemName.Text = "Safe"
+    
+        local RarityText = Drawing.new("Text")
+        RarityText.Visible = false
+        RarityText.Center = true
+        RarityText.Outline = true
+        RarityText.Font = 2
+        RarityText.Size = 13
+        RarityText.Color = Color3.new(1, 1, 1)
+        RarityText.Text = "Type"
+    
+        local StatusText = Drawing.new("Text")
+        StatusText.Visible = false
+        StatusText.Center = true
+        StatusText.Outline = true
+        StatusText.Font = 2
+        StatusText.Size = 13
+        StatusText.Color = Color3.new(1, 1, 1)
+        StatusText.Text = "Status"
+    
+        local DistanceText = Drawing.new("Text")
+        DistanceText.Visible = false
+        DistanceText.Center = true
+        DistanceText.Outline = true
+        DistanceText.Font = 2
+        DistanceText.Size = 13
+        DistanceText.Color = Color3.new(1, 1, 1)
+        DistanceText.Text = "Distance"
+    
+        local function InfoUpdate()
+            local Iu
+    
+            Iu = game:GetService("RunService").RenderStepped:Connect(function()
+                if not workspace:IsAncestorOf(Vault) then
+                    ItemName.Visible = false
+                    RarityText.Visible = false
+                    StatusText.Visible = false
+                    DistanceText.Visible = false
+    
+                    Iu:Disconnect()
+                else
+                    local Vector, OnScreen = Cam:WorldToViewportPoint(Vault:FindFirstChild("MainPart").Position)
+    
+                    if OnScreen then
+                        ItemName.Position = Vector2.new(Vector.X, Vector.Y - 40)
+                        RarityText.Position = Vector2.new(Vector.X, Vector.Y - 30)
+                        StatusText.Position = Vector2.new(Vector.X, Vector.Y - 20)
+                        DistanceText.Position = Vector2.new(Vector.X, Vector.Y - 10)
+    
+                        ItemName.Visible = false
+                        RarityText.Visible = false
+                        StatusText.Visible = false
+                        DistanceText.Visible = false
+    
+                        local ItemDistance = math.ceil((Vault:FindFirstChild("MainPart").Position - game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").Position).magnitude)
+    
+                        if SafeEsp == true then
+                            if ItemDistance < SafeDistance then
+                                if tostring(Vault:FindFirstChild("MainPart").EffectA.Sparkle.Color) == "0 0.184314 1 0.4 0 1 0.184314 1 0.4 0 " then
+                                    RarityText.Text = "Rarity: Good"
+                                    RarityText.Color = Color3.new(0, 1, 0)
+        
+                                    if GoodSafe == true then
+                                        ItemName.Visible = true
+                                        RarityText.Visible = true
+                                        StatusText.Visible = true
+                                        DistanceText.Visible = true
+                                    else
+                                        ItemName.Visible = false
+                                        RarityText.Visible = false
+                                        StatusText.Visible = false
+                                        DistanceText.Visible = false
+                                    end
+                                elseif tostring(Vault:FindFirstChild("MainPart").EffectA.Sparkle.Color) == "0 1 0.184314 0.184314 0 1 1 0.184314 0.184314 0 " then
+                                    RarityText.Text = "Rarity: Rare"
+                                    RarityText.Color = Color3.new(1, 0, 0)
+        
+                                    if RareSafe == true then
+                                        ItemName.Visible = true
+                                        RarityText.Visible = true
+                                        StatusText.Visible = true
+                                        DistanceText.Visible = true
+                                    else
+                                        ItemName.Visible = false
+                                        RarityText.Visible = false
+                                        StatusText.Visible = false
+                                        DistanceText.Visible = false
+                                    end
+                                end
+            
+                                DistanceText.Text = "["..tostring(ItemDistance).."]"
+                                StatusText.Text = "Broken: "..tostring(Vault.Values.Broken.Value)
+                            else
+                                ItemName.Visible = false
+                                RarityText.Visible = false
+                                StatusText.Visible = false
+                                DistanceText.Visible = false
+                            end
+                        else
+                            ItemName.Visible = false
+                            RarityText.Visible = false
+                            StatusText.Visible = false
+                            DistanceText.Visible = false
+                        end
+                    else
+                        ItemName.Visible = false
+                        RarityText.Visible = false
+                        StatusText.Visible = false
+                        DistanceText.Visible = false
+                    end
+                end
+            end)
+        end
+        coroutine.wrap(InfoUpdate)()
+    end
+    -- #endregion
+    
+    -- #region RegisterESP 
+    local function RegisterESP(Register)
+        local ItemName = Drawing.new("Text")
+        ItemName.Visible = false
+        ItemName.Center = true
+        ItemName.Outline = true
+        ItemName.Font = 2
+        ItemName.Size = 13
+        ItemName.Color = Color3.new(1, 1, 1)
+        ItemName.Text = "Register"
+    
+        local StatusText = Drawing.new("Text")
+        StatusText.Visible = false
+        StatusText.Center = true
+        StatusText.Outline = true
+        StatusText.Font = 2
+        StatusText.Size = 13
+        StatusText.Color = Color3.new(1, 1, 1)
+        StatusText.Text = "Status"
+    
+        local DistanceText = Drawing.new("Text")
+        DistanceText.Visible = false
+        DistanceText.Center = true
+        DistanceText.Outline = true
+        DistanceText.Font = 2
+        DistanceText.Size = 13
+        DistanceText.Color = Color3.new(1, 1, 1)
+        DistanceText.Text = "Distance"
+    
+        local function InfoUpdate()
+            local Iu
+    
+            Iu = game:GetService("RunService").RenderStepped:Connect(function()
+                if not workspace:IsAncestorOf(Register) then
+                    ItemName.Visible = false
+                    StatusText.Visible = false
+                    DistanceText.Visible = false
+    
+                    Iu:Disconnect()
+                else
+                    local Vector, OnScreen = Cam:WorldToViewportPoint(Register:FindFirstChild("MainPart").Position)
+    
+                    if OnScreen then
+                        ItemName.Position = Vector2.new(Vector.X, Vector.Y - 30)
+                        StatusText.Position = Vector2.new(Vector.X, Vector.Y - 20)
+                        DistanceText.Position = Vector2.new(Vector.X, Vector.Y - 10)
+    
+                        ItemName.Visible = false
+                        StatusText.Visible = false
+                        DistanceText.Visible = false
+    
+                        local ItemDistance = math.ceil((Register:FindFirstChild("MainPart").Position - game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").Position).magnitude)
+    
+                        if RegisterEsp == true then
+                            if ItemDistance < RegisterDistance then
+                                ItemName.Visible = true
+                                StatusText.Visible = true
+                                DistanceText.Visible = true
+        
+                                DistanceText.Text = "["..tostring(ItemDistance).."]"
+                                StatusText.Text = "Broken: "..tostring(Register.Values.Broken.Value)
+                            else
+                                ItemName.Visible = false
+                                StatusText.Visible = false
+                                DistanceText.Visible = false
+                            end
+                        else
+                            ItemName.Visible = false
+                            StatusText.Visible = false
+                            DistanceText.Visible = false
+                        end
+                    else
+                        ItemName.Visible = false
+                        StatusText.Visible = false
+                        DistanceText.Visible = false
+                    end
+                end
+            end)
+        end
+        coroutine.wrap(InfoUpdate)()
+    end
+    -- #endregion
+    
+    -- #region Added
+    game:GetService("Workspace").Filter.SpawnedPiles.ChildAdded:Connect(function(Object)
+        if ScrapEsp == true then
+            coroutine.wrap(ScrapESP)(Object)
+        end
+    end)
+    -- #endregion
+    
+    -- #endregion
+    
+    -- #region Main
+    CrimMainS:NewToggle("Infinite Stamina", "Good luck not getting caught.", function(V)
+        InfiniteStamina = V
+    
+        if V == true then
+            Xylic.Notification("<b>Aurora Hub</b>", "Infinite Stamina Enabled.", 5)
+        elseif V == false then
+            Xylic.Notification("<b>Aurora Hub</b>", "Infinite Stamina Disabled.", 5)
+        end
+    end)
+
+    CrimMainS:NewToggle("No Fail Lockpick", "In the fucking name u never fail lockpicking.", function(V)
+        NoFailLockpick = V
+
+        if V == true then
+            Xylic.Notification("<b>Aurora Hub</b>", "No Fail Lockpick Enabled.", 5)
+        elseif V == false then
+            Xylic.Notification("<b>Aurora Hub</b>", "No Fail Lockpick Disabled.", 5)
+            game:GetService("ReplicatedStorage").Storage.GUIs.LockpickGUI.MF["LP_Frame"].Frames.B1.Bar.PosV.Value = 125
+        end
+    end)
+    -- #endregion
+    
+    -- #region PlayerESP
+    CrimPlayerS:NewToggle("Player Esp", "Enables Player ESP", function(V)
+        if V == true then
+            Xylic.Notification("<b>Aurora Hub</b>", "Scrap ESP Enabled.", 5)
+        elseif V == false then
+            Xylic.Notification("<b>Aurora Hub</b>", "Scrap ESP Disabled.", 5)
+        end
+    
+        KiriotsESPLib.Color = Color3.fromRGB(196, 57, 57)
+        KiriotsESPLib.TeamColor = false
+        KiriotsESPLib:Toggle(V)
+    end)
+    
+    CrimPlayerS:NewToggle("Tracers", "Setting of player esp.", function(V)
+        KiriotsESPLib.Tracers = V
+    end)
+    
+    CrimPlayerS:NewToggle("Names", "Setting of player esp.", function(V)
+        KiriotsESPLib.Names = V
+    end)
+    
+    CrimPlayerS:NewToggle("Boxes", "Setting of player esp.", function(V)
+        KiriotsESPLib.Boxes = V
+    end)
+    
+    CrimPlayerS:NewToggle("Face Camera", "Setting of player esp.", function(V)
+        KiriotsESPLib.FaceCamera = V
+    end)
+    -- #endregion
+    
+    -- #region ScrapESP
+    CrimScrapS:NewToggle("Scrap Esp", "Enables Scrap ESP, Helpfull for getting good guns, and selling them.", function(V)
+        if V == true then
+            for i, v in pairs(game:GetService("Workspace").Filter.SpawnedPiles:GetChildren()) do
+                coroutine.wrap(ScrapESP)(v)
+            end
+    
+            Xylic.Notification("<b>Aurora Hub</b>", "Scrap ESP Enabled.", 5)
+        elseif V == false then
+            Xylic.Notification("<b>Aurora Hub</b>", "Scrap ESP Disabled.", 5)
+        end
+    
+        ScrapEsp = V
+    end)
+    
+    CrimScrapS:NewToggle("Rare Only", "Rare only scrap.", function(V)
+        RareScrap = V
+    end)
+    
+    CrimScrapS:NewToggle("Good Only", "Good only scrap.", function(V)
+        GoodScrap = V
+    end)
+    
+    CrimScrapS:NewToggle("Trash Only", "Trash only scrap.", function(V)
+        BadScrap = V
+    end)
+    
+    CrimScrapS:NewSlider("Distance", "Changes the scrap esp Distance.", 2000, 250, function(V)
+        ScrapDistance = V
+    end)
+    -- #endregion
+    
+    -- #region SafeESP
+    CrimSafeS:NewToggle("Safe Esp", "Enables Safe ESP, Helpfull for getting ez cash.", function(V)
+        if V == true then
+            for i, v in pairs(game:GetService("Workspace").Map.BredMakurz:GetChildren()) do
+                if v:FindFirstChild("Type").Value > 1 then
+                    coroutine.wrap(SafeESP)(v)
+                end
+            end
+    
+            Xylic.Notification("<b>Aurora Hub</b>", "Safe ESP Enabled.", 5)
+        elseif V == false then
+            Xylic.Notification("<b>Aurora Hub</b>", "Safe ESP Disabled.", 5)
+        end
+    
+        SafeEsp = V
+    end)
+    
+    CrimSafeS:NewToggle("Rare Only", "Rare only safe.", function(V)
+        RareSafe = V
+    end)
+    
+    CrimSafeS:NewToggle("Good Only", "Good only safe.", function(V)
+        GoodSafe = V
+    end)
+    
+    CrimSafeS:NewSlider("Distance", "Changes the safe esp Distance.", 2000, 250, function(V)
+        SafeDistance = V
+    end)
+    -- #endregion
+    
+    -- #region RegisterESP
+    CrimRegisterS:NewToggle("Register Esp", "Enables Register ESP, Helpfull for getting ez cash.", function(V)
+        if V == true then
+            for i, v in pairs(game:GetService("Workspace").Map.BredMakurz:GetChildren()) do
+                if v:FindFirstChild("Type").Value == 1 then
+                    coroutine.wrap(RegisterESP)(v)
+                end
+            end
+    
+            Xylic.Notification("<b>Aurora Hub</b>", "Register ESP Enabled.", 5)
+        elseif V == false then
+            Xylic.Notification("<b>Aurora Hub</b>", "Register ESP Disabled.", 5)
+        end
+    
+        RegisterEsp = V
+    end)
+    
+    CrimRegisterS:NewSlider("Distance", "Changes the register esp Distance.", 2000, 250, function(V)
+        RegisterDistance = V
+    end)
+    -- #endregion
+    
+    -- #region Credits
+    CreditsOwnerS:NewButton("JackeyBot - Founder", "", function() end)
+    CreditsDevsS:NewButton("Deez - Developer", "", function() end)
+    CreditsMiscS:NewKeybind("Toggle GUI", "", Enum.KeyCode.Home, function() Library:ToggleUI() end)
+    CreditsMiscS:NewButton("Discord Server", "https://discord.gg/xRYHSY35wx", function() setclipboard("https://discord.gg/xRYHSY35wx") end)
+    -- #endregion
+    
+    Xylic.Notification("<b>Aurora Hub</b>", "Aurora, Criminality Loaded.", 5)
+end)
